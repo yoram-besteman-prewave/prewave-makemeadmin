@@ -3,58 +3,77 @@ name: Build MSI Installer
 on:
   push:
     branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
   workflow_dispatch:
 
 jobs:
-  build:
+  build-x64:
+    name: Build x64 MSI
     runs-on: windows-latest
     
     steps:
-    - name: Checkout code
+    - name: Checkout
       uses: actions/checkout@v4
       
-    - name: Add MSBuild to PATH
+    - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
       
     - name: Setup NuGet
       uses: NuGet/setup-nuget@v2
       
     - name: Install WiX Toolset
-      run: choco install wixtoolset -y
+      run: choco install wixtoolset -y --no-progress
+      shell: cmd
         
     - name: Restore NuGet Packages
-      run: nuget restore "MakeMeAdmin.sln"
+      run: nuget restore "MakeMeAdmin.sln" -NonInteractive
+      shell: cmd
       
-    - name: Build All Projects (x64)
-      run: msbuild "MakeMeAdmin.sln" /p:Configuration=Release /p:Platform=x64 /m
+    - name: Build Solution x64
+      run: msbuild "MakeMeAdmin.sln" /p:Configuration=Release /p:Platform=x64 /m /v:minimal
+      shell: cmd
       
-    - name: Build Setup/MSI (x64)
-      run: msbuild "Setup\Setup.wixproj" /p:Configuration=Release /p:Platform=x64 /m
-      
-    - name: Build All Projects (x86)
-      run: msbuild "MakeMeAdmin.sln" /p:Configuration=Release /p:Platform=x86 /m
-      
-    - name: Build Setup/MSI (x86)
-      run: msbuild "Setup\Setup.wixproj" /p:Configuration=Release /p:Platform=x86 /m
-      
-    - name: Find MSI Files
-      run: |
-        echo "Searching for MSI files:"
-        dir /s *.msi
-        echo ""
-        echo "Contents of Installers directory:"
-        if exist Installers dir Installers
+    - name: List MSI Files
+      run: dir /s /b *.msi
+      shell: cmd
         
     - name: Upload x64 MSI
       uses: actions/upload-artifact@v4
       with:
-        name: MakeMeAdmin-x64-MSI
-        path: "Installers/*x64*.msi"
+        name: MakeMeAdmin-x64-Installer
+        path: "**/*x64*.msi"
+
+  build-x86:
+    name: Build x86 MSI  
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+      
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v2
+      
+    - name: Install WiX Toolset
+      run: choco install wixtoolset -y --no-progress
+      shell: cmd
+        
+    - name: Restore NuGet Packages
+      run: nuget restore "MakeMeAdmin.sln" -NonInteractive
+      shell: cmd
+      
+    - name: Build Solution x86
+      run: msbuild "MakeMeAdmin.sln" /p:Configuration=Release /p:Platform=x86 /m /v:minimal
+      shell: cmd
+      
+    - name: List MSI Files
+      run: dir /s /b *.msi
+      shell: cmd
         
     - name: Upload x86 MSI
       uses: actions/upload-artifact@v4
       with:
-        name: MakeMeAdmin-x86-MSI
-        path: "Installers/*x86*.msi"
+        name: MakeMeAdmin-x86-Installer
+        path: "**/*x86*.msi"
