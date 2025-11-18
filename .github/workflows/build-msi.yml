@@ -5,7 +5,7 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
-  workflow_dispatch:  # Allow manual trigger
+  workflow_dispatch:
 
 jobs:
   build:
@@ -22,42 +22,39 @@ jobs:
       uses: NuGet/setup-nuget@v2
       
     - name: Install WiX Toolset
-      run: |
-        choco install wixtoolset -y
-        
-    - name: Debug - Show Directory Contents
-      run: |
-        echo "Current directory:"
-        pwd
-        echo ""
-        echo "Files in root:"
-        dir
-        echo ""
-        echo "Looking for solution file:"
-        dir *.sln
+      run: choco install wixtoolset -y
         
     - name: Restore NuGet Packages
       run: nuget restore "MakeMeAdmin.sln"
       
-    - name: Build x64 Release
-      run: msbuild "MakeMeAdmin.sln" /p:Configuration=Release /p:Platform=x64 /t:Setup /m
+    - name: Build All Projects (x64)
+      run: msbuild "MakeMeAdmin.sln" /p:Configuration=Release /p:Platform=x64 /m
       
-    - name: Build x86 Release  
-      run: msbuild "MakeMeAdmin.sln" /p:Configuration=Release /p:Platform=x86 /t:Setup /m
+    - name: Build Setup/MSI (x64)
+      run: msbuild "Setup\Setup.wixproj" /p:Configuration=Release /p:Platform=x64 /m
+      
+    - name: Build All Projects (x86)
+      run: msbuild "MakeMeAdmin.sln" /p:Configuration=Release /p:Platform=x86 /m
+      
+    - name: Build Setup/MSI (x86)
+      run: msbuild "Setup\Setup.wixproj" /p:Configuration=Release /p:Platform=x86 /m
       
     - name: Find MSI Files
       run: |
         echo "Searching for MSI files:"
         dir /s *.msi
+        echo ""
+        echo "Contents of Installers directory:"
+        if exist Installers dir Installers
         
     - name: Upload x64 MSI
       uses: actions/upload-artifact@v4
       with:
         name: MakeMeAdmin-x64-MSI
-        path: "**/*x64*.msi"
+        path: "Installers/*x64*.msi"
         
     - name: Upload x86 MSI
       uses: actions/upload-artifact@v4
       with:
         name: MakeMeAdmin-x86-MSI
-        path: "**/*x86*.msi"
+        path: "Installers/*x86*.msi"
