@@ -13,38 +13,67 @@ jobs:
     
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       
     - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v1.1
+      uses: microsoft/setup-msbuild@v2
       
     - name: Setup NuGet
-      uses: NuGet/setup-nuget@v1
+      uses: NuGet/setup-nuget@v2
       
     - name: Setup WiX Toolset
       run: |
         choco install wixtoolset -y
+        refreshenv
+      shell: powershell
+        
+    - name: Verify WiX Installation
+      run: |
+        Get-Command candle.exe
+        Get-Command light.exe
+      shell: powershell
+      
+    - name: List Solution Directory
+      run: |
+        Write-Host "Current directory:"
+        Get-Location
+        Write-Host "`nFiles in current directory:"
+        Get-ChildItem
+        Write-Host "`nLooking for solution file:"
+        Get-ChildItem -Recurse -Filter "*.sln"
+      shell: powershell
         
     - name: Restore NuGet packages
-      run: nuget restore MakeMeAdmin/MakeMeAdmin.sln
+      run: nuget restore MakeMeAdmin.sln
+      working-directory: .
       
     - name: Build Solution (x64)
-      run: msbuild MakeMeAdmin/MakeMeAdmin.sln /p:Configuration=Release /p:Platform=x64 /t:Setup /m
+      run: msbuild MakeMeAdmin.sln /p:Configuration=Release /p:Platform=x64 /t:Setup /m /v:detailed
+      working-directory: .
       
     - name: Build Solution (x86)
-      run: msbuild MakeMeAdmin/MakeMeAdmin.sln /p:Configuration=Release /p:Platform=x86 /t:Setup /m
+      run: msbuild MakeMeAdmin.sln /p:Configuration=Release /p:Platform=x86 /t:Setup /m /v:detailed
+      working-directory: .
+      
+    - name: List Output Files
+      run: |
+        Write-Host "Looking for MSI files:"
+        Get-ChildItem -Recurse -Filter "*.msi"
+      shell: powershell
       
     - name: Upload x64 MSI Artifact
       uses: actions/upload-artifact@v4
       with:
         name: MakeMeAdmin-x64-Installer
-        path: MakeMeAdmin/Installers/*x64*.msi
+        path: Installers/*x64*.msi
+        if-no-files-found: error
         
     - name: Upload x86 MSI Artifact
       uses: actions/upload-artifact@v4
       with:
         name: MakeMeAdmin-x86-Installer
-        path: MakeMeAdmin/Installers/*x86*.msi
+        path: Installers/*x86*.msi
+        if-no-files-found: error
         
     - name: Create Release (on tag)
       if: startsWith(github.ref, 'refs/tags/')
