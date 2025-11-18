@@ -28,22 +28,16 @@ jobs:
       run: nuget restore "MakeMeAdmin.sln" -NonInteractive
       shell: cmd
       
-    - name: Build All Projects EXCEPT Setup (x64)
-      run: |
-        msbuild "Enumerations\Enumerations.csproj" /p:Configuration=Release /p:Platform=x64
-        msbuild "LsaLogonSessions\LsaLogonSessions.csproj" /p:Configuration=Release /p:Platform=x64
-        msbuild "Settings\Settings.csproj" /p:Configuration=Release /p:Platform=x64
-        msbuild "Logging\Logging.csproj" /p:Configuration=Release /p:Platform=x64
-        msbuild "UserList\UserList.csproj" /p:Configuration=Release /p:Platform=x64
-        msbuild "ProcessCommunication\ProcessCommunication.csproj" /p:Configuration=Release /p:Platform=x64
-        msbuild "Service\Service.csproj" /p:Configuration=Release /p:Platform=x64
-        msbuild "UserRequestApp\LocalUI.csproj" /p:Configuration=Release /p:Platform=x64
-        msbuild "RemoteUI\RemoteUI.csproj" /p:Configuration=Release /p:Platform=x64
-        msbuild "WiXCustomAction\WiXCustomAction.csproj" /p:Configuration=Release /p:Platform=x64
+    - name: Build All C# Projects First (x64)
+      run: msbuild "MakeMeAdmin.sln" /p:Configuration=Release /p:Platform=x64 /t:Enumerations;LsaLogonSessions;Settings;Logging;UserList;ProcessCommunication;Service;LocalUI;RemoteUI;WiXCustomAction /m
       shell: cmd
       
-    - name: Build Setup Project (x64)
-      run: msbuild "Setup\Setup.wixproj" /p:Configuration=Release /p:Platform=x64 /v:detailed
+    - name: Wait for files to be ready
+      run: timeout /t 2 /nobreak
+      shell: cmd
+      
+    - name: Build Setup via Solution (x64)
+      run: msbuild "MakeMeAdmin.sln" /p:Configuration=Release /p:Platform=x64 /t:Setup /m
       shell: cmd
       
     - name: List MSI Files
@@ -78,22 +72,16 @@ jobs:
       run: nuget restore "MakeMeAdmin.sln" -NonInteractive
       shell: cmd
       
-    - name: Build All Projects EXCEPT Setup (x86)
-      run: |
-        msbuild "Enumerations\Enumerations.csproj" /p:Configuration=Release /p:Platform=x86
-        msbuild "LsaLogonSessions\LsaLogonSessions.csproj" /p:Configuration=Release /p:Platform=x86
-        msbuild "Settings\Settings.csproj" /p:Configuration=Release /p:Platform=x86
-        msbuild "Logging\Logging.csproj" /p:Configuration=Release /p:Platform=x86
-        msbuild "UserList\UserList.csproj" /p:Configuration=Release /p:Platform=x86
-        msbuild "ProcessCommunication\ProcessCommunication.csproj" /p:Configuration=Release /p:Platform=x86
-        msbuild "Service\Service.csproj" /p:Configuration=Release /p:Platform=x86
-        msbuild "UserRequestApp\LocalUI.csproj" /p:Configuration=Release /p:Platform=x86
-        msbuild "RemoteUI\RemoteUI.csproj" /p:Configuration=Release /p:Platform=x86
-        msbuild "WiXCustomAction\WiXCustomAction.csproj" /p:Configuration=Release /p:Platform=x86
+    - name: Build All C# Projects First (x86)
+      run: msbuild "MakeMeAdmin.sln" /p:Configuration=Release /p:Platform=x86 /t:Enumerations;LsaLogonSessions;Settings;Logging;UserList;ProcessCommunication;Service;LocalUI;RemoteUI;WiXCustomAction /m
       shell: cmd
       
-    - name: Build Setup Project (x86)
-      run: msbuild "Setup\Setup.wixproj" /p:Configuration=Release /p:Platform=x86 /v:detailed
+    - name: Wait for files to be ready
+      run: timeout /t 2 /nobreak
+      shell: cmd
+      
+    - name: Build Setup via Solution (x86)
+      run: msbuild "MakeMeAdmin.sln" /p:Configuration=Release /p:Platform=x86 /t:Setup /m
       shell: cmd
       
     - name: List MSI Files
