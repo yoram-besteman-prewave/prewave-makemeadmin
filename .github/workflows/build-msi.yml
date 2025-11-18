@@ -32,9 +32,6 @@ jobs:
       run: msbuild "MakeMeAdmin.sln" /p:Configuration=Release /p:Platform=x64 /t:Enumerations;LsaLogonSessions;Settings;Logging;UserList;ProcessCommunication;Service;LocalUI;RemoteUI;WiXCustomAction /m
       shell: cmd
       
-    - name: Wait for files to be ready
-      run: timeout /t 2 /nobreak
-      shell: cmd
       
     - name: Build Setup via Solution (x64)
       run: msbuild "MakeMeAdmin.sln" /p:Configuration=Release /p:Platform=x64 /t:Setup /m
@@ -76,9 +73,6 @@ jobs:
       run: msbuild "MakeMeAdmin.sln" /p:Configuration=Release /p:Platform=x86 /t:Enumerations;LsaLogonSessions;Settings;Logging;UserList;ProcessCommunication;Service;LocalUI;RemoteUI;WiXCustomAction /m
       shell: cmd
       
-    - name: Wait for files to be ready
-      run: timeout /t 2 /nobreak
-      shell: cmd
       
     - name: Build Setup via Solution (x86)
       run: msbuild "MakeMeAdmin.sln" /p:Configuration=Release /p:Platform=x86 /t:Setup /m
