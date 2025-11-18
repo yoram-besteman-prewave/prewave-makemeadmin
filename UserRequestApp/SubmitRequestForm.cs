@@ -214,8 +214,8 @@ namespace SinclairCC.MakeMeAdmin
             get
             {
                 // Always prompt for a reason, independent of registry/GPO settings.
-                // Require at least 40 characters before proceeding.
-                const int minLength = 40;
+                // Require at least 20 characters before proceeding.
+                const int minLength = 20;
 
                 using (RequestReasonDialog reasonDialog = new RequestReasonDialog())
                 {

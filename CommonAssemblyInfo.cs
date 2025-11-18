@@ -26,9 +26,9 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Sinclair Community College")]
+[assembly: AssemblyCompany("Prewave GmbH")]
 [assembly: AssemblyProduct("Admin on Demand")]
-[assembly: AssemblyCopyright("Copyright © 2010-2025, Sinclair Community College")]
+[assembly: AssemblyCopyright("Copyright © 2010-2025, Prewave GmbH")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

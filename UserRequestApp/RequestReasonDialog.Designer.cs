@@ -108,7 +108,7 @@ namespace SinclairCC.MakeMeAdmin
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(360, 49);
             this.label1.TabIndex = 0;
-            this.label1.Text = "Please provide a reason for requesting administrator rights.";
+            this.label1.Text = "Please provide a reason for requesting administrator rights (minimum 20 characters).";
             // 
             // RequestReasonDialog
             // 

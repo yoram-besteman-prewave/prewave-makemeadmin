@@ -343,7 +343,7 @@ namespace SinclairCC.MakeMeAdmin
                     "$textNodes.Item(0).AppendChild($toastXml.CreateTextNode('{0}')) | Out-Null; " +
                     "$textNodes.Item(1).AppendChild($toastXml.CreateTextNode('{1}')) | Out-Null; " +
                     "$toast = [Windows.UI.Notifications.ToastNotification]::new($toastXml); " +
-                    "[Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('Make Me Admin').Show($toast);",
+                    "[Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('Admin on Demand').Show($toast);",
                     title.Replace("'", "''"),
                     message.Replace("'", "''")
                 );
