@@ -34,7 +34,7 @@ jobs:
         copy "MakeMeAdmin\UserRequestApp\bin\Release x64\*.dll" output\
         
     - name: Upload EXE Artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: MakeMeAdmin-Executables-x64
         path: output/*
