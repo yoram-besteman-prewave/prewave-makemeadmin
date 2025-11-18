@@ -1,0 +1,57 @@
+name: Build MSI Installer
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1.1
+      
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v1
+      
+    - name: Setup WiX Toolset
+      run: |
+        choco install wixtoolset -y
+        
+    - name: Restore NuGet packages
+      run: nuget restore MakeMeAdmin/MakeMeAdmin.sln
+      
+    - name: Build Solution (x64)
+      run: msbuild MakeMeAdmin/MakeMeAdmin.sln /p:Configuration=Release /p:Platform=x64 /t:Setup /m
+      
+    - name: Build Solution (x86)
+      run: msbuild MakeMeAdmin/MakeMeAdmin.sln /p:Configuration=Release /p:Platform=x86 /t:Setup /m
+      
+    - name: Upload x64 MSI Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: MakeMeAdmin-x64-Installer
+        path: MakeMeAdmin/Installers/*x64*.msi
+        
+    - name: Upload x86 MSI Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: MakeMeAdmin-x86-Installer
+        path: MakeMeAdmin/Installers/*x86*.msi
+        
+    - name: Create Release (on tag)
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          MakeMeAdmin/Installers/*.msi
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

@@ -1,0 +1,41 @@
+name: Build EXE Files (No MSI)
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1.1
+      
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v1
+      
+    - name: Restore NuGet packages
+      run: nuget restore MakeMeAdmin/MakeMeAdmin.sln
+      
+    - name: Build Solution (x64) - EXE only
+      run: msbuild MakeMeAdmin/MakeMeAdmin.sln /p:Configuration=Release /p:Platform=x64 /t:LocalUI;Service;RemoteUI /m
+      
+    - name: Collect EXE files
+      run: |
+        mkdir output
+        copy "MakeMeAdmin\UserRequestApp\bin\Release x64\MakeMeAdmin.exe" output\
+        copy "MakeMeAdmin\Service\bin\Release x64\MakeMeAdminService.exe" output\
+        copy "MakeMeAdmin\Service\bin\Release x64\*.dll" output\
+        copy "MakeMeAdmin\UserRequestApp\bin\Release x64\*.dll" output\
+        
+    - name: Upload EXE Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: MakeMeAdmin-Executables-x64
+        path: output/*
+
