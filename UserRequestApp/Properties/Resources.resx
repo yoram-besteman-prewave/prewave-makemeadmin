@@ -121,7 +121,7 @@
     <value>Ready.</value>
   </data>
   <data name="ApplicationName" xml:space="preserve">
-    <value>Make Me Admin</value>
+    <value>Admin on Demand</value>
   </data>
   <data name="CheckingAdminStatus" xml:space="preserve">
     <value>Checking administrator status...</value>

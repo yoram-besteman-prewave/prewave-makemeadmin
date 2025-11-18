@@ -27,7 +27,7 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Sinclair Community College")]
-[assembly: AssemblyProduct("Make Me Admin")]
+[assembly: AssemblyProduct("Admin on Demand")]
 [assembly: AssemblyCopyright("Copyright © 2010-2025, Sinclair Community College")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

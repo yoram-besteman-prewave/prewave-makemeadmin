@@ -115,38 +115,23 @@ namespace SinclairCC.MakeMeAdmin
             // 
             resources.ApplyResources(this.addMeButton, "addMeButton");
             this.addMeButton.Name = "addMeButton";
-            this.addMeButton.BackColor = System.Drawing.Color.Black;
-            this.addMeButton.ForeColor = System.Drawing.Color.White;
-            this.addMeButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.addMeButton.FlatAppearance.BorderSize = 0;
-            this.addMeButton.FlatAppearance.BorderColor = System.Drawing.Color.Black;
-            this.addMeButton.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.addMeButton.Cursor = System.Windows.Forms.Cursors.Hand;
             this.toolTip.SetToolTip(this.addMeButton, resources.GetString("addMeButton.ToolTip"));
+            this.addMeButton.UseVisualStyleBackColor = true;
             this.addMeButton.Click += new System.EventHandler(this.ClickSubmitButton);
-            this.addMeButton.Paint += new System.Windows.Forms.PaintEventHandler(this.Button_Paint);
             // 
             // removeMeButton
             // 
             resources.ApplyResources(this.removeMeButton, "removeMeButton");
             this.removeMeButton.Name = "removeMeButton";
-            this.removeMeButton.BackColor = System.Drawing.Color.White;
-            this.removeMeButton.ForeColor = System.Drawing.Color.Black;
-            this.removeMeButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.removeMeButton.FlatAppearance.BorderSize = 1;
-            this.removeMeButton.FlatAppearance.BorderColor = System.Drawing.Color.Black;
-            this.removeMeButton.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.removeMeButton.Cursor = System.Windows.Forms.Cursors.Hand;
             this.toolTip.SetToolTip(this.removeMeButton, resources.GetString("removeMeButton.ToolTip"));
+            this.removeMeButton.UseVisualStyleBackColor = true;
             this.removeMeButton.Click += new System.EventHandler(this.ClickRemoveRightsButton);
-            this.removeMeButton.Paint += new System.Windows.Forms.PaintEventHandler(this.Button_Paint);
             // 
             // statusStrip1
             // 
             this.statusStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.appStatus});
-            this.statusStrip1.BackColor = System.Drawing.Color.White;
             resources.ApplyResources(this.statusStrip1, "statusStrip1");
             this.statusStrip1.Name = "statusStrip1";
             // 
@@ -154,7 +139,6 @@ namespace SinclairCC.MakeMeAdmin
             // 
             this.appStatus.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.appStatus.Name = "appStatus";
-            this.appStatus.ForeColor = System.Drawing.Color.Black;
             resources.ApplyResources(this.appStatus, "appStatus");
             this.appStatus.Spring = true;
             // 
@@ -185,18 +169,16 @@ namespace SinclairCC.MakeMeAdmin
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.White;
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.removeMeButton);
             this.Controls.Add(this.addMeButton);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "SubmitRequestForm";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.Load += new System.EventHandler(this.FormLoad);
             this.VisibleChanged += new System.EventHandler(this.SubmitRequestForm_VisibleChanged);
-            this.Paint += new System.Windows.Forms.PaintEventHandler(this.Form_Paint);
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
             this.ResumeLayout(false);
