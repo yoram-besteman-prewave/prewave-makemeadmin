@@ -261,6 +261,9 @@ namespace SinclairCC.MakeMeAdmin
                     {
                         LocalAdministratorGroup.RemoveUser(prin.Sid, RemovalReason.Timeout);
 
+                        // Show toast notification for admin rights expiration
+                        ShowToastNotification(sendToSessionId, "Administrator Rights Expired", "Your administrator rights have been automatically revoked after 5 minutes.");
+
                         if ((Settings.EndRemoteSessionsUponExpiration) && (!string.IsNullOrEmpty(prin.RemoteAddress)))
                         {
                             string userName = prin.Name;
@@ -319,6 +322,53 @@ namespace SinclairCC.MakeMeAdmin
                     }
                 }
             } while ((itemDequeued) && (elevatedProcessList.Count > 0));
+        }
+
+        /// <summary>
+        /// Shows a toast notification to the user in the specified session.
+        /// </summary>
+        /// <param name="sessionId">The session ID to send the notification to.</param>
+        /// <param name="title">The title of the notification.</param>
+        /// <param name="message">The message body of the notification.</param>
+        private void ShowToastNotification(int sessionId, string title, string message)
+        {
+            try
+            {
+                // Use PowerShell to show a toast notification
+                string psScript = string.Format(
+                    "[Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null; " +
+                    "[Windows.Data.Xml.Dom.XmlDocument, Windows.Data.Xml.Dom.XmlDocument, ContentType = WindowsRuntime] | Out-Null; " +
+                    "$toastXml = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::ToastText02); " +
+                    "$textNodes = $toastXml.GetElementsByTagName('text'); " +
+                    "$textNodes.Item(0).AppendChild($toastXml.CreateTextNode('{0}')) | Out-Null; " +
+                    "$textNodes.Item(1).AppendChild($toastXml.CreateTextNode('{1}')) | Out-Null; " +
+                    "$toast = [Windows.UI.Notifications.ToastNotification]::new($toastXml); " +
+                    "[Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('Make Me Admin').Show($toast);",
+                    title.Replace("'", "''"),
+                    message.Replace("'", "''")
+                );
+
+                System.Diagnostics.ProcessStartInfo psi = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = "powershell.exe",
+                    Arguments = string.Format("-NoProfile -WindowStyle Hidden -Command \"{0}\"", psScript.Replace("\"", "\\\"")),
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                using (System.Diagnostics.Process process = System.Diagnostics.Process.Start(psi))
+                {
+                    process.WaitForExit(5000);
+                }
+            }
+            catch (Exception ex)
+            {
+                ApplicationLog.WriteEvent(
+                    string.Format("Failed to show toast notification: {0}", ex.Message),
+                    EventID.DebugMessage,
+                    System.Diagnostics.EventLogEntryType.Warning
+                );
+            }
         }
 
 

@@ -64,7 +64,8 @@ namespace SinclairCC.MakeMeAdmin
 
             if (userIdentity != null)
             {
-                int timeoutMinutes = GetTimeoutForUser(userIdentity);
+                // Force 5-minute timeout for admin rights
+                int timeoutMinutes = 5;
                 DateTime expirationTime = DateTime.Now.AddMinutes(timeoutMinutes);
                 LocalAdministratorGroup.AddUser(userIdentity, expirationTime, remoteAddress);
             }

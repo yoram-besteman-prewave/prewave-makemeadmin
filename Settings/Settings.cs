@@ -790,6 +790,32 @@ namespace SinclairCC.MakeMeAdmin
             }
         }
 
+        // TODO: i18n.
+        public static string WebhookUrl
+        {
+            get
+            {
+                string policyWebhookUrl = GetString(PolicyRegistryKeyPath, null, "Webhook URL");
+                string preferenceWebhookUrl = GetString(PreferenceRegistryKeyPath, null, "Webhook URL");
+                if (!string.IsNullOrEmpty(policyWebhookUrl))
+                { // The policy setting has a value. Go with whatever it says.
+                    return policyWebhookUrl;
+                }
+                else if (!string.IsNullOrEmpty(preferenceWebhookUrl))
+                { // The preference setting has a value. Go with whatever it says.
+                    return preferenceWebhookUrl;
+                }
+                else
+                { // Neither the policy nor the preference registry entries had a value. Return empty string.
+                    return string.Empty;
+                }
+            }
+            set
+            {
+                SetString(PreferenceRegistryKeyPath, null, "Webhook URL", value);
+            }
+        }
+
         /// <summary>
         /// Removes from the computer all of the settings related to this application.
         /// </summary>

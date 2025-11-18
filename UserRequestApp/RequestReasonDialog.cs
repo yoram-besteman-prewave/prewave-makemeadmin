@@ -53,6 +53,43 @@ namespace SinclairCC.MakeMeAdmin
             {
                 this.responseComboBox.Enabled = false;
             }
+
+            // Apply rounded corners to the dialog
+            ApplyRoundedCorners();
+        }
+
+        /// <summary>
+        /// Applies rounded corners to the dialog.
+        /// </summary>
+        private void ApplyRoundedCorners()
+        {
+            System.Drawing.Drawing2D.GraphicsPath path = new System.Drawing.Drawing2D.GraphicsPath();
+            int radius = 15;
+            path.AddArc(0, 0, radius, radius, 180, 90);
+            path.AddArc(this.Width - radius, 0, radius, radius, 270, 90);
+            path.AddArc(this.Width - radius, this.Height - radius, radius, radius, 0, 90);
+            path.AddArc(0, this.Height - radius, radius, radius, 90, 90);
+            path.CloseFigure();
+            this.Region = new System.Drawing.Region(path);
+        }
+
+        /// <summary>
+        /// Handles the Paint event for the dialog to draw rounded borders.
+        /// </summary>
+        private void Dialog_Paint(object sender, System.Windows.Forms.PaintEventArgs e)
+        {
+            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            using (System.Drawing.Pen pen = new System.Drawing.Pen(System.Drawing.Color.Black, 2))
+            {
+                System.Drawing.Drawing2D.GraphicsPath path = new System.Drawing.Drawing2D.GraphicsPath();
+                int radius = 15;
+                path.AddArc(0, 0, radius, radius, 180, 90);
+                path.AddArc(this.Width - radius - 2, 0, radius, radius, 270, 90);
+                path.AddArc(this.Width - radius - 2, this.Height - radius - 2, radius, radius, 0, 90);
+                path.AddArc(0, this.Height - radius - 2, radius, radius, 90, 90);
+                path.CloseFigure();
+                e.Graphics.DrawPath(pen, path);
+            }
         }
 
         private void FormLoadHandler(object sender, EventArgs e)
@@ -72,6 +109,17 @@ namespace SinclairCC.MakeMeAdmin
         {
             this.responseComboBox.SelectedItem = Properties.Resources.OtherReason;
             SetOKButtonState();
+            UpdateCharacterCount();
+        }
+
+        /// <summary>
+        /// Updates the character count label.
+        /// </summary>
+        private void UpdateCharacterCount()
+        {
+            int currentLength = this.reasonTextBox.Text.Trim().Length;
+            this.charCountLabel.Text = string.Format("{0} / 40 characters", currentLength);
+            this.charCountLabel.ForeColor = currentLength >= 40 ? System.Drawing.Color.Green : System.Drawing.Color.Gray;
         }
 
         private void ResponseComboBoxSelectionChangeCommitted(object sender, EventArgs e)
@@ -88,18 +136,19 @@ namespace SinclairCC.MakeMeAdmin
                     string selectedItemText = ((string)this.responseComboBox.SelectedItem).Trim();
                     if (string.Compare(selectedItemText, Properties.Resources.OtherReason, true) == 0)
                     { // The "Other" item is selected in the combo box.
-                        // Enable the OK button if there is something in the text box.
-                        this.okButton.Enabled = this.reasonTextBox.Text.Trim().Length > 0;
+                        // Enable the OK button if there is at least 40 characters in the text box.
+                        this.okButton.Enabled = this.reasonTextBox.Text.Trim().Length >= 40;
                     }
                     else
                     {
-                        this.okButton.Enabled = true;
+                        // Canned reasons must also be at least 40 characters
+                        this.okButton.Enabled = selectedItemText.Length >= 40;
                     }
                 }
                 else
                 { // Nothing is selected in the combo box.
-                    // Enable the OK button if there is something in the text box.
-                    this.okButton.Enabled = this.reasonTextBox.Text.Trim().Length > 0;
+                    // Enable the OK button if there is at least 40 characters in the text box.
+                    this.okButton.Enabled = this.reasonTextBox.Text.Trim().Length >= 40;
                 }
             //}
         }

@@ -61,6 +61,11 @@ namespace SinclairCC.MakeMeAdmin
         /// </summary>
         private System.Timers.Timer notifyIconTimer;
 
+        /// <summary>
+        /// The reason provided by the user for requesting admin rights.
+        /// </summary>
+        private string requestReason = string.Empty;
+
 
         /// <summary>
         /// Initializes a new instance of the SubmitRequestForm class.
@@ -81,6 +86,78 @@ namespace SinclairCC.MakeMeAdmin
             };
             this.notifyIconTimer.AutoReset = true;
             this.notifyIconTimer.Elapsed += NotifyIconTimerElapsed;
+
+            // Apply rounded corners to the form
+            ApplyRoundedCorners();
+        }
+
+        /// <summary>
+        /// Applies rounded corners to the form.
+        /// </summary>
+        private void ApplyRoundedCorners()
+        {
+            System.Drawing.Drawing2D.GraphicsPath path = new System.Drawing.Drawing2D.GraphicsPath();
+            int radius = 20;
+            path.AddArc(0, 0, radius, radius, 180, 90);
+            path.AddArc(this.Width - radius, 0, radius, radius, 270, 90);
+            path.AddArc(this.Width - radius, this.Height - radius, radius, radius, 0, 90);
+            path.AddArc(0, this.Height - radius, radius, radius, 90, 90);
+            path.CloseFigure();
+            this.Region = new System.Drawing.Region(path);
+        }
+
+        /// <summary>
+        /// Handles the Paint event for the form to draw rounded borders.
+        /// </summary>
+        private void Form_Paint(object sender, System.Windows.Forms.PaintEventArgs e)
+        {
+            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            using (System.Drawing.Pen pen = new System.Drawing.Pen(System.Drawing.Color.Black, 2))
+            {
+                System.Drawing.Drawing2D.GraphicsPath path = new System.Drawing.Drawing2D.GraphicsPath();
+                int radius = 20;
+                path.AddArc(0, 0, radius, radius, 180, 90);
+                path.AddArc(this.Width - radius - 2, 0, radius, radius, 270, 90);
+                path.AddArc(this.Width - radius - 2, this.Height - radius - 2, radius, radius, 0, 90);
+                path.AddArc(0, this.Height - radius - 2, radius, radius, 90, 90);
+                path.CloseFigure();
+                e.Graphics.DrawPath(pen, path);
+            }
+        }
+
+        /// <summary>
+        /// Handles the Paint event for buttons to draw rounded corners.
+        /// </summary>
+        private void Button_Paint(object sender, System.Windows.Forms.PaintEventArgs e)
+        {
+            System.Windows.Forms.Button btn = sender as System.Windows.Forms.Button;
+            if (btn == null) return;
+
+            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            
+            System.Drawing.Drawing2D.GraphicsPath path = new System.Drawing.Drawing2D.GraphicsPath();
+            int radius = 10;
+            path.AddArc(0, 0, radius, radius, 180, 90);
+            path.AddArc(btn.Width - radius, 0, radius, radius, 270, 90);
+            path.AddArc(btn.Width - radius, btn.Height - radius, radius, radius, 0, 90);
+            path.AddArc(0, btn.Height - radius, radius, radius, 90, 90);
+            path.CloseFigure();
+            btn.Region = new System.Drawing.Region(path);
+
+            using (System.Drawing.SolidBrush brush = new System.Drawing.SolidBrush(btn.BackColor))
+            {
+                e.Graphics.FillPath(brush, path);
+            }
+
+            System.Drawing.StringFormat sf = new System.Drawing.StringFormat
+            {
+                Alignment = System.Drawing.StringAlignment.Center,
+                LineAlignment = System.Drawing.StringAlignment.Center
+            };
+            using (System.Drawing.SolidBrush brush = new System.Drawing.SolidBrush(btn.ForeColor))
+            {
+                e.Graphics.DrawString(btn.Text, btn.Font, brush, btn.ClientRectangle, sf);
+            }
         }
 
 
@@ -213,92 +290,116 @@ namespace SinclairCC.MakeMeAdmin
             {
                 bool dialogSatisfied = false;
 
-                switch (Settings.PromptForReason)
+                // Reason is now ALWAYS required
+                using (RequestReasonDialog reasonDialog = new RequestReasonDialog())
                 {
-                    case ReasonPrompt.None:
-                        // No reason dialog box required.
-                        dialogSatisfied = true;
-                        break;
-
-                    case ReasonPrompt.Optional:
-
-                        // The reason dialog is optional, so rights are always allowed.
-                        dialogSatisfied = true;
-
-                        if ((Settings.AllowFreeTextReason) || ((Settings.CannedReasons != null) && (Settings.CannedReasons.Length > 0)))
-                        {
-                            using (RequestReasonDialog reasonDialog = new RequestReasonDialog())
-                            {
-                                switch (reasonDialog.ShowDialog(this))
-                                {
-                                    case DialogResult.Cancel:
-                                        // User did not provide a reason, but is not obligated to do so.
-                                        break;
-                                    case DialogResult.OK:
-                                        ApplicationLog.WriteEvent(string.Format(Properties.Resources.ReasonProvidedByUser, reasonDialog.Reason), EventID.ReasonProvidedByUser, System.Diagnostics.EventLogEntryType.Information);
-                                        break;
-                                    default:
-                                        // Not sure how we got to this point, because it should never happen.
-                                        break;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            ApplicationLog.WriteEvent(Properties.Resources.ReasonDialogEmpty, EventID.ReasonDialogEmpty, System.Diagnostics.EventLogEntryType.Warning);
-                        }
-
-                        break;
-
-                    case ReasonPrompt.Required:
-
-                        if ((Settings.AllowFreeTextReason) || ((Settings.CannedReasons != null) && (Settings.CannedReasons.Length > 0)))
-                        {
-                            using (RequestReasonDialog reasonDialog = new RequestReasonDialog())
-                            {
-                                switch (reasonDialog.ShowDialog(this))
-                                {
-                                    case DialogResult.Cancel:
-                                        dialogSatisfied = false;
-                                        MessageBox.Show(this, Properties.Resources.MandatoryReasonNotProvided, Properties.Resources.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1);
-                                        break;
-                                    case DialogResult.OK:
-                                        if (string.Compare(reasonDialog.Reason, string.Format("{0}: ", Properties.Resources.OtherReason), true) == 0)
-                                        { // User didn't really provide a reason. The string is blank.
-                                            dialogSatisfied = false;
-                                            MessageBox.Show(this, Properties.Resources.MandatoryReasonNotProvided, Properties.Resources.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1);
-                                        }
-                                        else
-                                        {
-                                            dialogSatisfied = true;
-                                            ApplicationLog.WriteEvent(string.Format(Properties.Resources.ReasonProvidedByUser, reasonDialog.Reason), EventID.ReasonProvidedByUser, System.Diagnostics.EventLogEntryType.Information);
-                                        }
-                                        break;
-                                    default:
-                                        // Not sure how we got to this point, because it should never happen.
-                                        // Better to be safe than sorry, so no admin rights.
-                                        dialogSatisfied = false;
-                                        break;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            MessageBox.Show(this, Properties.Resources.ReasonDialogBoxPrevented, Properties.Resources.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1);
+                    switch (reasonDialog.ShowDialog(this))
+                    {
+                        case DialogResult.Cancel:
                             dialogSatisfied = false;
-                        }
-
-                        break;
-
-                    default:
-                        // TODO: i18n
-                        ApplicationLog.WriteEvent(string.Format("Unexpected value for the reason prompt setting: {0:N0}", ((int)(Settings.PromptForReason))), EventID.DebugMessage, System.Diagnostics.EventLogEntryType.Warning);
-                        dialogSatisfied = true;
-                        break;
+                            MessageBox.Show(this, "A reason is required to request administrator rights.", Properties.Resources.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1);
+                            break;
+                        case DialogResult.OK:
+                            if (reasonDialog.Reason.Trim().Length < 40)
+                            { // User didn't provide enough characters.
+                                dialogSatisfied = false;
+                                MessageBox.Show(this, "The reason must be at least 40 characters.", Properties.Resources.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1);
+                            }
+                            else
+                            {
+                                dialogSatisfied = true;
+                                this.requestReason = reasonDialog.Reason;
+                                ApplicationLog.WriteEvent(string.Format(Properties.Resources.ReasonProvidedByUser, reasonDialog.Reason), EventID.ReasonProvidedByUser, System.Diagnostics.EventLogEntryType.Information);
+                                
+                                // Post to webhook
+                                PostToWebhook(reasonDialog.Reason);
+                            }
+                            break;
+                        default:
+                            // Not sure how we got to this point, because it should never happen.
+                            // Better to be safe than sorry, so no admin rights.
+                            dialogSatisfied = false;
+                            break;
+                    }
                 }
 
                 return dialogSatisfied;
             }
+        }
+
+        /// <summary>
+        /// Posts the reason and device name to the configured webhook URL.
+        /// </summary>
+        /// <param name="reason">The reason provided by the user.</param>
+        private void PostToWebhook(string reason)
+        {
+            try
+            {
+                string webhookUrl = Settings.WebhookUrl;
+                if (string.IsNullOrEmpty(webhookUrl))
+                {
+                    return; // No webhook configured
+                }
+
+                string deviceName = System.Environment.MachineName;
+                string userName = WindowsIdentity.GetCurrent().Name;
+                string timestamp = DateTime.Now.ToString("o");
+
+                string jsonPayload = string.Format(
+                    "{{\"device\":\"{0}\",\"user\":\"{1}\",\"reason\":\"{2}\",\"timestamp\":\"{3}\"}}",
+                    EscapeJson(deviceName),
+                    EscapeJson(userName),
+                    EscapeJson(reason),
+                    timestamp
+                );
+
+                using (System.Net.WebClient client = new System.Net.WebClient())
+                {
+                    client.Headers[System.Net.HttpRequestHeader.ContentType] = "application/json";
+                    System.Threading.Tasks.Task.Run(() =>
+                    {
+                        try
+                        {
+                            client.UploadString(webhookUrl, "POST", jsonPayload);
+                        }
+                        catch (Exception ex)
+                        {
+                            // Log but don't block the user if webhook fails
+                            ApplicationLog.WriteEvent(
+                                string.Format("Failed to post to webhook: {0}", ex.Message),
+                                EventID.DebugMessage,
+                                System.Diagnostics.EventLogEntryType.Warning
+                            );
+                        }
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log but don't block the user if webhook fails
+                ApplicationLog.WriteEvent(
+                    string.Format("Error preparing webhook post: {0}", ex.Message),
+                    EventID.DebugMessage,
+                    System.Diagnostics.EventLogEntryType.Warning
+                );
+            }
+        }
+
+        /// <summary>
+        /// Escapes special characters for JSON strings.
+        /// </summary>
+        private string EscapeJson(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+            {
+                return text;
+            }
+            return text
+                .Replace("\\", "\\\\")
+                .Replace("\"", "\\\"")
+                .Replace("\n", "\\n")
+                .Replace("\r", "\\r")
+                .Replace("\t", "\\t");
         }
 
         /// <summary>
