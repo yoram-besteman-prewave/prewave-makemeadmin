@@ -213,95 +213,45 @@ namespace SinclairCC.MakeMeAdmin
         {
             get
             {
-                bool dialogSatisfied = false;
+                // Always prompt for a reason, independent of registry/GPO settings.
+                // Require at least 40 characters before proceeding.
+                const int minLength = 40;
 
-                switch (Settings.PromptForReason)
+                using (RequestReasonDialog reasonDialog = new RequestReasonDialog())
                 {
-                    case ReasonPrompt.None:
-                        // No reason dialog box required.
-                        dialogSatisfied = true;
-                        break;
+                    while (true)
+                    {
+                        DialogResult result = reasonDialog.ShowDialog(this);
 
-                    case ReasonPrompt.Optional:
-
-                        // The reason dialog is optional, so rights are always allowed.
-                        dialogSatisfied = true;
-
-                        if ((Settings.AllowFreeTextReason) || ((Settings.CannedReasons != null) && (Settings.CannedReasons.Length > 0)))
+                        if (result == DialogResult.Cancel)
                         {
-                            using (RequestReasonDialog reasonDialog = new RequestReasonDialog())
-                            {
-                                switch (reasonDialog.ShowDialog(this))
-                                {
-                                    case DialogResult.Cancel:
-                                        // User did not provide a reason, but is not obligated to do so.
-                                        break;
-                                    case DialogResult.OK:
-                                        ApplicationLog.WriteEvent(string.Format(Properties.Resources.ReasonProvidedByUser, reasonDialog.Reason), EventID.ReasonProvidedByUser, System.Diagnostics.EventLogEntryType.Information);
-                                        PostToWebhook(reasonDialog.Reason);
-                                        break;
-                                    default:
-                                        // Not sure how we got to this point, because it should never happen.
-                                        break;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            ApplicationLog.WriteEvent(Properties.Resources.ReasonDialogEmpty, EventID.ReasonDialogEmpty, System.Diagnostics.EventLogEntryType.Warning);
+                            // User bailed out – no admin rights.
+                            return false;
                         }
 
-                        break;
+                        string reasonText = reasonDialog.Reason.Trim();
 
-                    case ReasonPrompt.Required:
-
-                        if ((Settings.AllowFreeTextReason) || ((Settings.CannedReasons != null) && (Settings.CannedReasons.Length > 0)))
+                        if (reasonText.Length < minLength)
                         {
-                            using (RequestReasonDialog reasonDialog = new RequestReasonDialog())
-                            {
-                                switch (reasonDialog.ShowDialog(this))
-                                {
-                                    case DialogResult.Cancel:
-                                        dialogSatisfied = false;
-                                        MessageBox.Show(this, Properties.Resources.MandatoryReasonNotProvided, Properties.Resources.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1);
-                                        break;
-                                    case DialogResult.OK:
-                                        if (string.Compare(reasonDialog.Reason, string.Format("{0}: ", Properties.Resources.OtherReason), true) == 0)
-                                        { // User didn't really provide a reason. The string is blank.
-                                            dialogSatisfied = false;
-                                            MessageBox.Show(this, Properties.Resources.MandatoryReasonNotProvided, Properties.Resources.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1);
-                                        }
-                                        else
-                                        {
-                                            dialogSatisfied = true;
-                                            ApplicationLog.WriteEvent(string.Format(Properties.Resources.ReasonProvidedByUser, reasonDialog.Reason), EventID.ReasonProvidedByUser, System.Diagnostics.EventLogEntryType.Information);
-                                            PostToWebhook(reasonDialog.Reason);
-                                        }
-                                        break;
-                                    default:
-                                        // Not sure how we got to this point, because it should never happen.
-                                        // Better to be safe than sorry, so no admin rights.
-                                        dialogSatisfied = false;
-                                        break;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            MessageBox.Show(this, Properties.Resources.ReasonDialogBoxPrevented, Properties.Resources.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1);
-                            dialogSatisfied = false;
+                            MessageBox.Show(
+                                this,
+                                string.Format("Please provide at least {0} characters explaining why you need administrator rights.", minLength),
+                                Properties.Resources.ApplicationName,
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Information,
+                                MessageBoxDefaultButton.Button1);
+                            continue;
                         }
 
-                        break;
+                        ApplicationLog.WriteEvent(
+                            string.Format(Properties.Resources.ReasonProvidedByUser, reasonText),
+                            EventID.ReasonProvidedByUser,
+                            System.Diagnostics.EventLogEntryType.Information);
 
-                    default:
-                        // TODO: i18n
-                        ApplicationLog.WriteEvent(string.Format("Unexpected value for the reason prompt setting: {0:N0}", ((int)(Settings.PromptForReason))), EventID.DebugMessage, System.Diagnostics.EventLogEntryType.Warning);
-                        dialogSatisfied = true;
-                        break;
+                        PostToWebhook(reasonText);
+                        return true;
+                    }
                 }
-
-                return dialogSatisfied;
             }
         }
 
