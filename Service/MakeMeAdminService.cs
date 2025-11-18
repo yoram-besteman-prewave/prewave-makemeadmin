@@ -85,7 +85,7 @@ namespace SinclairCC.MakeMeAdmin
             this.CanHandleSessionChangeEvent = true;
             */
 
-            this.EventLog.Source = "Make Me Admin";
+            this.EventLog.Source = "Admin on Demand";
             this.AutoLog = false;
 
             this.removalTimer = new System.Timers.Timer()

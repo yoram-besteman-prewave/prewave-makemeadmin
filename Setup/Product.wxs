@@ -80,7 +80,7 @@
       <?endif ?>
 
       <Directory Id="$(var.PlatformProgramFilesFolder)">
-        <Directory Id="INSTALLFOLDER" Name="Make Me Admin">
+        <Directory Id="INSTALLFOLDER" Name="Admin on Demand">
 
 			<Directory Id="da_Localization" Name="da">
 				<Component Id="RemoteElevation_da" Guid="B4496726-831F-4EC4-A2A5-6E5C2A85FF97">
@@ -139,7 +139,7 @@
           
           <Component Id="ElevationUserInterface" Guid="562B228B-6029-457D-96C9-6B4BCA69660D">
             <File Id="ElevationUserInterfaceExe" Name="$(var.LocalUI.TargetFileName)" Source="$(var.LocalUI.TargetPath)" KeyPath="yes" />
-            <Shortcut Id="LocalUserInferfaceShortcut" Directory="ProgramMenuFolder" Name="Make Me Admin" Description="Make Me Admin Local User Interface" Advertise="yes" WorkingDirectory="INSTALLDIR" Icon="SecurityLock.ico" IconIndex="0" />
+            <Shortcut Id="LocalUserInferfaceShortcut" Directory="ProgramMenuFolder" Name="Admin on Demand" Description="Admin on Demand Local User Interface" Advertise="yes" WorkingDirectory="INSTALLDIR" Icon="SecurityLock.ico" IconIndex="0" />
 
             <?if $(var.Configuration) = Debug ?>
               <RegistryValue Action="write" Id="AdminRightsTimeout" Key="Software\Sinclair Community College\Make Me Admin" Root="HKLM" Value="2" Type="integer" Name="Admin Rights Timeout" />
@@ -150,7 +150,7 @@
           </Component>
           <Component Id="RemoteElevationUserInterface" Guid="E62C25C4-A0E8-45B4-8313-6954A8C2F6F9">
             <File Id="RemoteElevationUserInterfaceExe" Name="$(var.RemoteUI.TargetFileName)" Source="$(var.RemoteUI.TargetPath)" KeyPath="yes" />
-            <Shortcut Id="RemoteUserInferfaceShortcut" Directory="ProgramMenuFolder" Name="Make Me Admin Remote" Description="Make Me Admin Remote User Interface" Advertise="yes" WorkingDirectory="INSTALLDIR" Icon="SecurityLock.ico" IconIndex="0" />
+            <Shortcut Id="RemoteUserInferfaceShortcut" Directory="ProgramMenuFolder" Name="Admin on Demand Remote" Description="Admin on Demand Remote User Interface" Advertise="yes" WorkingDirectory="INSTALLDIR" Icon="SecurityLock.ico" IconIndex="0" />
           </Component>
           <Component Id="MruListLibrary" Guid="291425FC-1060-4197-9950-D2DC5CFD3F6B">
             <File Id="MruLibrary" Name="MruList.dll" Source="$(var.RemoteUI.TargetDir)\MruList.dll" KeyPath="yes" />
